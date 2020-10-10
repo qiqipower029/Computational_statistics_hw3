@@ -12,3 +12,81 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
+## Question 1
+```{r define function from professor}
+# Define the function written by Dr. Demirtas
+
+############################################################
+#EM algorithm for univariate normal MAR example
+#Written by Hakan Demirtas
+############################################################
+# Required arguments:
+# y= incomplete univariate data, with missing values
+# denoted by NA.
+# start=starting values for parameters. This should be a
+# list with two components: mu and sigma
+#
+# Optional arguments:
+# maxits=maximum number of iterations
+# eps=convergence criterion
+#
+# Output:
+# This function returns a list with the following components:
+# theta=final parameter estimates
+# iter=how many iterations were performed
+# cvgd=logical value indicating whether it converged or not.
+# loglik= vector of length ``iter'' giving the observed-data
+# log-likelihood at each iteration
+##############################################################
+
+univariate.normal.em.demirtas<-function(y, start, maxits=500, eps=0.000001){
+  newmu<-start$mu ; newsigma2<-start$sigma2 ; n<-length(y)
+  w<-!is.na(y) ; yobs<-y[w] ; nobs<-length(yobs) ; nmis<-n-nobs
+  loglik<-numeric(maxits) ; iter<-0 ; cvgd<-F
+  cat(paste("Performing iterations of EM...","\n"))
+  
+  while ((iter<maxits)&(!cvgd)){
+  iter<-iter+1 ; mu<-newmu ; sigma2<-newsigma2
+  # EVALUATE OBSERVED-DATA-LIKELIHOOD
+  ll<--(nobs/2)*log(sigma2)-1/(2*sigma2)*sum((yobs-mu)^2)
+  loglik[iter]<-ll
+  # E-STEP
+  ET1<-sum(yobs)+nmis*mu
+  ET2<-sum(yobs^2)+nmis*(sigma2+mu^2)
+  # M-STEP
+  newmu<-ET1/n
+  newsigma2<-(ET2/n)-newmu^2
+  # ASSESS CONVERGENCE
+  cvgd<-(abs(newmu-mu)<=eps*abs(mu)) & (abs(newsigma2-sigma2)<=eps*abs(sigma2))}
+  
+  cat(paste("Done!","\n"))
+  theta<-list(mu=newmu, sigma2=newsigma2)
+  loglik<-loglik[1:iter]
+  result<-list(theta=theta, iter=iter, cvgd=cvgd,loglik=loglik)
+  result}
+
+```
+
+```{r question 1}
+# Import data
+data = c(50.1, 39.8, 46.4, NA, NA, 31.2, 50.0, 49.6, 48.7, 49.7, 53.4, 62.1, NA)
+
+# Convergence criteria
+eps = c(0.001, 0.0001, 0.00001, 0.000001)
+
+# Calculate the sample mean and sample variance (only observed data)
+mu = mean(data, na.rm = T); mu
+sigma2 = sum((data[!is.na(data)] - mu)^2)/length(data[!is.na(data)]); sigma2
+
+# Use the result to be the starting values
+start1 = list(mu = 48.1, sigma2 = 59.426)
+
+# Try resonable starting value
+start2 = list(mu = 50, sigma2 = 60)
+
+# Try some crazy starting values
+start3 = list(mu = 0, sigma2 = 10)
+start4 = list(mu = 1000, sigma2 = 1000)
+start5 = list(mu = -1000, sigma2 = -1000)
+```
+
