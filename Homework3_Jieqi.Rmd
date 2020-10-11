@@ -87,6 +87,88 @@ start2 = list(mu = 50, sigma2 = 60)
 # Try some crazy starting values
 start3 = list(mu = 0, sigma2 = 10)
 start4 = list(mu = 1000, sigma2 = 1000)
-start5 = list(mu = -1000, sigma2 = -1000)
+start5 = list(mu = 10000, sigma2 = 21000)
+
+# Create variables to store results
+mu_result = numeric(20)
+sigma2_result = numeric(20)
+iteration = numeric(20)
+log_like = numeric(20)
+
+# Start iterations and try 4 different convergence criteria 
+for (i in 1:4) {
+  # At each iteration, try different starting values
+  EM1 = univariate.normal.em.demirtas(data, start1, eps = eps[i])
+  mu_result[i] = EM1$theta$mu
+  sigma2_result[i] = EM1$theta$sigma2
+  iteration[i] = EM1$iter
+  log_like[i] = EM1$loglik[EM1$iter]
+  
+  
+  EM2 = univariate.normal.em.demirtas(data, start2, eps = eps[i])
+  mu_result[i+4] = EM2$theta$mu
+  sigma2_result[i+4] = EM2$theta$sigma2
+  iteration[i+4] = EM2$iter
+  log_like[i+4] = EM2$loglik[EM2$iter]
+  
+  
+  EM3 = univariate.normal.em.demirtas(data, start3, eps = eps[i])
+  mu_result[i+8] = EM3$theta$mu
+  sigma2_result[i+8] = EM3$theta$sigma2
+  iteration[i+8] = EM3$iter
+  log_like[i+8] = EM3$loglik[EM3$iter]
+  
+  
+  EM4 = univariate.normal.em.demirtas(data, start4, eps = eps[i])
+  mu_result[i+12] = EM4$theta$mu
+  sigma2_result[i+12] = EM4$theta$sigma2
+  iteration[i+12] = EM4$iter
+  log_like[i+12] = EM4$loglik[EM4$iter]
+  
+  
+  EM5 = univariate.normal.em.demirtas(data, start5, eps = eps[i])
+  mu_result[i+16] = EM5$theta$mu
+  sigma2_result[i+16] = EM5$theta$sigma2
+  iteration[i+16] = EM5$iter
+  log_like[i+16] = EM5$loglik[EM5$iter]
+}
+
+# Sort the results
+convergence_criteria = rep(eps, 5)
+start_mu = c(rep(start1$mu, 4), rep(start2$mu, 4), rep(start3$mu, 4), rep(start4$mu, 4), rep(start5$mu, 4))
+start_sigma2 = c(rep(start1$sigma2, 4), rep(start2$sigma2, 4), rep(start3$sigma2, 4), rep(start4$sigma2, 4), rep(start5$sigma2, 4))
+result_table = cbind(convergence_criteria, start_mu, start_sigma2, mu_result, sigma2_result, iteration, log_like) %>% as.data.frame()
+
+result_table %>% knitr::kable()
+```
+
+From the result, we could see that, the estimated $\hat\mu$ are almost the same no matter what starting values and convergence criteria we choose. However, the value of $\hat{\sigma^2}$ are affected by the convergence criteria. When we choose the sample mean and sample variance of observed data as the starting values, the iteration is only 1. But other starting values lead to more iterations, especially higher precision of convergence criteria. If we set the convergence criteria more precise, and give enough iterations, we can reach very similar (even identical) parameter estimates through EM.
+
+Then we can try another dataset with the same mean and variance and the same sample size. Let's see whether EM would give us the same estimates.
+```{r question 1 new dataset}
+# Create a new dataset
+set.seed(1029)
+data_new = rnorm(13, mean = 48.1, sqrt(59.426))
+
+# Randomly choose 3 data points to be missing
+missing = sample(1:13, size = 3, replace = F); missing
+data_new[missing] = NA; data_new
+
+# Calculate the sample mean and sample variance from the new dataset
+mu = mean(data_new, na.rm = T); mu
+sigma2 = sum((data_new[!is.na(data_new)] - mu)^2)/length(data_new[!is.na(data_new)]); sigma2
+
+# Use the new dataset to run EM method again
+start_new = list(mu = mu, sigma2 = sigma2); start_new
+
+univariate.normal.em.demirtas(data_new, start_new)
+```
+
+We could see that, if we try a sample that is derived from the population, the results could be different. So the EM method can provide estimates based on the sample instead of the true population.
+
+## Question 2
+```{r question 2}
+# Generate the sample dataset
+
 ```
 
