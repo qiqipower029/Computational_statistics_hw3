@@ -167,8 +167,114 @@ univariate.normal.em.demirtas(data_new, start_new)
 We could see that, if we try a sample that is derived from the population, the results could be different. So the EM method can provide estimates based on the sample instead of the true population.
 
 ## Question 2
-```{r question 2}
-# Generate the sample dataset
+Add two additional steps in the previous EM function and define the function to calculate elementwise convergence rate.
+```{r question 2 functions}
+# Add two additional steps in the previous EM function
+univariate.normal.em.demirtas_new = function(y, start, maxits=500, eps=0.000001){
+  newmu<-start$mu ; newsigma2<-start$sigma2 ; n<-length(y)
+  w<-!is.na(y) ; yobs<-y[w] ; nobs<-length(yobs) ; nmis<-n-nobs
+  loglik<-numeric(maxits) ; iter<-0 ; cvgd<-F
+  mut = c()
+  sigma2t = c()
+  cat(paste("Performing iterations of EM...","\n"))
+  
+  while ((iter<maxits)&(!cvgd)){
+  iter<-iter+1 ; mu<-newmu ; sigma2<-newsigma2
+  # EVALUATE OBSERVED-DATA-LIKELIHOOD
+  ll<--(nobs/2)*log(sigma2)-1/(2*sigma2)*sum((yobs-mu)^2)
+  loglik[iter]<-ll
+  # E-STEP
+  ET1<-sum(yobs)+nmis*mu
+  ET2<-sum(yobs^2)+nmis*(sigma2+mu^2)
+  # M-STEP
+  newmu<-ET1/n
+  newsigma2<-(ET2/n)-newmu^2
+  
+  # Record parameter theta_t
+  mut[iter] = newmu
+  sigma2t[iter] = newsigma2
+  
+  # ASSESS CONVERGENCE
+  cvgd<-(abs(newmu-mu)<=eps*abs(mu)) & (abs(newsigma2-sigma2)<=eps*abs(sigma2))}
+  
+  # Adding two additional steps
+  for (i in 1:2) {
+    iter = iter + 1
+    mu = newmu
+    sigma2 = newsigma2
+    # EVALUATE OBSERVED-DATA-LIKELIHOOD
+    ll<--(nobs/2)*log(sigma2)-1/(2*sigma2)*sum((yobs-mu)^2)
+    loglik[iter]<-ll
+    # E-STEP
+    ET1<-sum(yobs)+nmis*mu
+    ET2<-sum(yobs^2)+nmis*(sigma2+mu^2)
+    # M-STEP
+    newmu<-ET1/n
+    newsigma2<-(ET2/n)-newmu^2
+  
+    # Record parameter theta_t
+    mut[iter] = newmu
+    sigma2t[iter] = newsigma2
+  }
+  cat(paste("Done!","\n"))
+  theta<-list(mu=mut, sigma2=sigma2t)
+  loglik<-loglik[1:iter]
+  result<-list(theta=theta, iter=iter, cvgd=cvgd,loglik=loglik)
+  result}
 
+# Calculate the elementwise rate of convergence
+# Because we added two steps, t-1 will be the step that we get the convergence
+rate_cal = function(theta) {
+  rate = c()
+  t = length(theta)
+  for (i in 2:t-1) {
+    rate[i] = (theta[i+1]-theta[i])/(theta[i]-theta[i-1])
+  }
+  return(rate)
+}
 ```
 
+Then we create the dataset.
+```{r question 2 dataset}
+# Create the dataset, normally distributed with mean 50 and sd 10
+set.seed(1029)
+data_2 = rnorm(100, 50, 5)
+mis = sample(1:100, size = 90, replace = F)
+data_2[mis] = NA
+
+# Calculate the sample mean and sample variance
+mu = mean(data_2, na.rm = T); mu
+sigma2 = sum((data_2[!is.na(data_2)] - mu)^2)/length(data_2[!is.na(data_2)]); sigma2
+
+# Set starting values
+start_value = list(mu = mu, sigma2 = 10); start_value
+
+# Run EM function
+result_question2 = univariate.normal.em.demirtas_new(data_2, start_value)
+mu_result = result_question2$theta$mu
+sigma2_result = result_question2$theta$sigma2
+
+# Calculate the convergence rate for mu
+rate_cal(mu_result)
+
+# Calculate the convergence rate for sigma2
+rate_cal(sigma2_result)
+```
+
+Since the $\hat\mu$ converges at the very beginning, the denominator becomes 0, the rate is not available in thie case. Also, the elementwise rate of convergence for $\hat{\sigma^2}$ is always 0.9, which is also the proportion of missing in the sample (90 out of 100 are missing). Let's try another pair of starting values that are not convergent at beginning.
+```{r question 2 another starting values}
+start_value = list(mu = 0, sigma2 = 0)
+
+# Run EM function
+result_question2 = univariate.normal.em.demirtas_new(data_2, start_value)
+mu_result = result_question2$theta$mu
+sigma2_result = result_question2$theta$sigma2
+
+# Calculate the convergence rate for mu
+rate_cal(mu_result)
+
+# Calculate the convergence rate for sigma2
+rate_cal(sigma2_result)
+```
+
+In this case, $\hat\mu$ has the elementwise rate of convergence at 0.9. Because the update of new $\hat{\sigma^2}$ is dependent on $\hat\mu$, the rate for $\hat{\sigma^2}$ is not 0.9 at the early phase of iterations. However, when $\hat\mu$ became stable, the rate for $\hat{\sigma^2}$ is 0.9. 
