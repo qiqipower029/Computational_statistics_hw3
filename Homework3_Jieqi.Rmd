@@ -160,12 +160,62 @@ sigma2 = sum((data_new[!is.na(data_new)] - mu)^2)/length(data_new[!is.na(data_ne
 
 # Use the new dataset to run EM method again
 start_new = list(mu = mu, sigma2 = sigma2); start_new
-
+start_new2 = list(mu = 0, sigma2 = 100); start_new2
 univariate.normal.em.demirtas(data_new, start_new)
+univariate.normal.em.demirtas(data_new, start_new2)
 ```
 
-We could see that, if we try a sample that is derived from the population, the results could be different. So the EM method can provide estimates based on the sample instead of the true population.
+We could see that, if we try a sample that is derived from the population, the results could be different. So the EM method can provide estimates based on the sample instead of the true population. Also it is found that EM method will converge to the observed data sample mean and sample variance in univariate cases.
 
+Let's try another dataset with higher portion of missing points. In this dataset, 6 points will be missing.
+```{r question 1 another dataset}
+# Create a new dataset
+set.seed(1029)
+data_new = rnorm(13, mean = 48.1, sqrt(59.426))
+
+# Randomly choose 3 data points to be missing
+missing = sample(1:13, size = 6, replace = F); missing
+data_new[missing] = NA; data_new
+
+# Calculate the sample mean and sample variance from the new dataset
+mu = mean(data_new, na.rm = T); mu
+sigma2 = sum((data_new[!is.na(data_new)] - mu)^2)/length(data_new[!is.na(data_new)]); sigma2
+
+# Use the new dataset to run EM method again
+start_new = list(mu = mu, sigma2 = sigma2); start_new
+start_new2 = list(mu = 0, sigma2 = 100); start_new2
+
+univariate.normal.em.demirtas(data_new, start_new)
+univariate.normal.em.demirtas(data_new, start_new2)
+```
+
+From the result, we could see that, if the missing portion becomes larger, we need more iterations to get the convergence. Here we can also see that EM method leads us to the sample mean and sample variance of observed data.
+
+Let's see how stable the estimation of EM method gives us.
+```{r question 1 1000 loops}
+mu_result = vector()
+sigma2_result = vector()
+set.seed(1029)
+for (i in 1:1000) {
+  data_new = rnorm(13, 48.1, sqrt(59.426))
+  mis = sample(1:13, 3, replace = F)
+  data_new[mis] = NA; data_new
+
+  mu = mean(data_new, na.rm = T)
+  sigma2 = sum((data_new[!is.na(data_new)] - mu)^2)/length(data_new[!is.na(data_new)])
+  start_new = list(mu = mu, sigma2 = sigma2)
+  theta = univariate.normal.em.demirtas(data_new, start_new)$theta
+  mu_result[i] = theta$mu
+  sigma2_result[i] = theta$sigma2
+}
+
+mean(mu_result)
+sd(mu_result)
+mean(sigma2_result)
+sd(sigma2_result)
+```
+
+From the result, we could see that, in EM method, $\hat{\sigma^2}$ has much larger variance than $\hat\mu$. This means that the result for estimation of mean is more stable.
 ## Question 2
 Add two additional steps in the previous EM function and define the function to calculate elementwise convergence rate.
 ```{r question 2 functions}
@@ -278,3 +328,5 @@ rate_cal(sigma2_result)
 ```
 
 In this case, $\hat\mu$ has the elementwise rate of convergence at 0.9. Because the update of new $\hat{\sigma^2}$ is dependent on $\hat\mu$, the rate for $\hat{\sigma^2}$ is not 0.9 at the early phase of iterations. However, when $\hat\mu$ became stable, the rate for $\hat{\sigma^2}$ is 0.9. 
+
+According to the paper written by Schafer in 1997, in most cases, the elementwise rate of convergence would estimate the largest eigenvalue of the ratio between the missing information to the complete data in the complete data information. Also this value could be affected by the starting values.
