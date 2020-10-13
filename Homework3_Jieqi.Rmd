@@ -216,6 +216,8 @@ sd(sigma2_result)
 ```
 
 From the result, we could see that, in EM method, $\hat{\sigma^2}$ has much larger variance than $\hat\mu$. This means that the result for estimation of mean is more stable.
+
+
 ## Question 2
 Add two additional steps in the previous EM function and define the function to calculate elementwise convergence rate.
 ```{r question 2 functions}
