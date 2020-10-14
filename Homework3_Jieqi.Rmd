@@ -367,7 +367,7 @@ em.exponential.mixture<-function(y, startval, maxits=10000, eps=0.00001, pi.fix)
     pix<-theta$pi
     lambda1<-theta$lambda1
     lambda2<-theta$lambda2
-    num<-pxi*lambda1*exp(-lambda1*y)
+    num<-pix*lambda1*exp(-lambda1*y)
     denom<-num+(1-pix)*lambda2*exp(-lambda2*y)
     delta<-num/denom
     T1<-sum(delta) ; T2<-sum(delta*y) ; T3<-sum(y)
