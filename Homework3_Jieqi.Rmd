@@ -432,4 +432,4 @@ plot_table %>%
   
 ```
 
-Here we could see that, $l(\pi, \lambda_1,\lambda_2|Y)=l(1-\pi,\lambda_2,\lambda_1|Y)$
+Here we could see that, $l(\pi, \lambda_1,\lambda_2|Y)=l(1-\pi,\lambda_2,\lambda_1|Y)$. However, they are not the same distribution.
