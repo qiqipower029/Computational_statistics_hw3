@@ -332,3 +332,58 @@ rate_cal(sigma2_result)
 In this case, $\hat\mu$ has the elementwise rate of convergence at 0.9. Because the update of new $\hat{\sigma^2}$ is dependent on $\hat\mu$, the rate for $\hat{\sigma^2}$ is not 0.9 at the early phase of iterations. However, when $\hat\mu$ became stable, the rate for $\hat{\sigma^2}$ is 0.9. 
 
 According to the paper written by Schafer in 1997, in most cases, the elementwise rate of convergence would estimate the largest eigenvalue of the ratio between the missing information to the complete data in the complete data information. Also this value could be affected by the starting values.
+
+## Question 3
+Import the dataset.
+```{r question 3}
+# Import dataset
+mixture = read.table(file = "./mixture.dat")
+```
+
+Then define the functions provided.
+```{r define functions for question 3}
+###########################################################
+# EM algorithm for two-part mixture of exponentials
+# Written by Hakan Demirtas
+# startval should be a list with three components:
+# pi=mixing proportion
+# lambda1=reciprocal mean of the first component
+# lambda1=reciprocal mean of the second component
+###########################################################
+# The function below allows us that pi can be fixed
+# to a specific value to perform constrained estimation.
+em.exponential.mixture<-function(y, startval, maxits=10000, eps=0.00001, pi.fix){
+  n<-length(y) ; newtheta<-startval
+  if(!missing(pi.fix)) newtheta$pi<-pi.fix
+  iter<-0
+  converged<-F
+  loglik<-numeric(maxits)
+  while((!converged)&(iter<maxits)){
+    iter<-iter+1
+    cat(iter); cat("...")
+    theta<-newtheta
+    
+    # DO E-STEP
+    pix<-theta$pi
+    lambda1<-theta$lambda1
+    lambda2<-theta$lambda2
+    num<-pxi*lambda1*exp(-lambda1*y)
+    denom<-num+(1-pix)*lambda2*exp(-lambda2*y)
+    delta<-num/denom
+    T1<-sum(delta) ; T2<-sum(delta*y) ; T3<-sum(y)
+    loglik[iter]<-sum(log(denom))
+    
+    # DO M-STEP
+    if (missing(pi.fix)) pix<-T1/n
+    lambda1<-T1/T2
+    lambda2<-(n-T1)/(T3-T2)
+    newtheta<-list(pix=pix, lambda1=lambda1, lambda2=lambda2)
+    
+    # ASSESS CONVERGENCE
+    old<-c(theta$pi, theta$lambda1, theta$lambda2)
+    new<-c(newtheta$pi, newtheta$lambda1, newtheta$lambda2)
+    converged<-all(abs(old-new)<=eps*abs(old))}
+    loglik<-loglik[1:iter]
+    list(theta=newtheta,iter=iter, converged=converged, loglik=loglik)}
+```
+
