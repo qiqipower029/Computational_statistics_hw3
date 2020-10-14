@@ -432,4 +432,6 @@ plot_table %>%
   
 ```
 
-Here we could see that, $l(\pi, \lambda_1,\lambda_2|Y)=l(1-\pi,\lambda_2,\lambda_1|Y)$. However, they are not the same distribution.
+Here we could see that, $l(\pi, \lambda_1,\lambda_2|Y)=l(1-\pi,\lambda_2,\lambda_1|Y)$. However, they are not the same distribution. We might need other information to differ these two cases.
+
+Then let's try to look at the confidence interval for $\pi$.
