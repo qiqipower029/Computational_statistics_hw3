@@ -204,7 +204,8 @@ for (i in 1:1000) {
   mu = mean(data_new, na.rm = T)
   sigma2 = sum((data_new[!is.na(data_new)] - mu)^2)/length(data_new[!is.na(data_new)])
   start_new = list(mu = mu, sigma2 = sigma2)
-  theta = univariate.normal.em.demirtas(data_new, start_new)$theta
+  result = univariate.normal.em.demirtas(data_new, start_new)
+  theta = result$theta
   mu_result[i] = theta$mu
   sigma2_result[i] = theta$sigma2
 }
@@ -338,6 +339,8 @@ Import the dataset.
 ```{r question 3}
 # Import dataset
 mixture = read.table(file = "./mixture.dat")
+data3 = t(mixture)
+data3 = as.vector(data3)
 ```
 
 Then define the functions provided.
@@ -360,7 +363,6 @@ em.exponential.mixture<-function(y, startval, maxits=10000, eps=0.00001, pi.fix)
   loglik<-numeric(maxits)
   while((!converged)&(iter<maxits)){
     iter<-iter+1
-    cat(iter); cat("...")
     theta<-newtheta
     
     # DO E-STEP
@@ -387,8 +389,47 @@ em.exponential.mixture<-function(y, startval, maxits=10000, eps=0.00001, pi.fix)
     list(theta=newtheta,iter=iter, converged=converged, loglik=loglik)}
 ```
 
-Then we can try some starting values.
-```{r}
-
+Then we can try some starting values. Here we want to fix the $\hat\pi$ at 0.45.
+```{r question 3 try starting values}
+start1 = list(pi = 0.3, lambda1 = 1, lambda2 = 0.5)
+start2 = list(pi = 0.7, lambda1 = 0.5, lambda2 = 1)
+em.exponential.mixture(data3, start1, eps = 0.0000001)
+em.exponential.mixture(data3, start2, eps = 0.0000001)
 ```
 
+From the result, we could see that, if we interchange the $\pi$ and $1-\pi$, and $\lambda_1$ and $\lambda_2$, the likelihood would be the same. Then we might not be able to know how the true distribution it is.
+
+We can visualize the situation by plotting the log likelihood function. 
+```{r question 3 plot the log likelihood, message=FALSE}
+pi_range = seq(0.01, 0.99, 0.001)
+start3 = list(pi = 0.5, lambda1 = 0.75, lambda2 = 0.75)
+
+logL1 = numeric(length(pi_range))
+logL2 = numeric(length(pi_range))
+logL3 = numeric(length(pi_range))
+for (i in 1:length(pi_range)) {
+  result1 = em.exponential.mixture(data3, start1, eps = 0.000001, pi.fix = pi_range[i])
+  result2 = em.exponential.mixture(data3, start2, eps = 0.000001, pi.fix = pi_range[i])
+  result3 = em.exponential.mixture(data3, start3, eps = 0.000001, pi.fix = pi_range[i])
+  conv_n1 = result1$iter
+  conv_n2 = result2$iter
+  conv_n3 = result3$iter
+  logL1[i] = result1[[4]][conv_n1]
+  logL2[i] = result2[[4]][conv_n2]
+  logL3[i] = result3[[4]][conv_n3]
+}
+
+plot_table = cbind(pi_range, logL1, logL2, logL3) %>% as.data.frame()
+plot_table %>% 
+  ggplot(aes(x = pi_range)) + 
+  geom_line(aes(y = logL1, colour = "pi")) +
+  geom_line(aes(y = logL2, colour = "1-pi")) +
+  geom_line(aes(y = logL3, colour = "lambda1 = lambda2")) +
+  theme_bw() + labs(
+    x = "Pi",
+    y = "Log Likelihood Function"
+  )
+  
+```
+
+Here we could see that, $l(\pi, \lambda_1,\lambda_2|Y)=l(1-\pi,\lambda_2,\lambda_1|Y)$
