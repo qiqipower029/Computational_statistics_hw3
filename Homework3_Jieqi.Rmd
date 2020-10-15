@@ -435,7 +435,11 @@ plot_table %>%
 Here we could see that, $l(\pi, \lambda_1,\lambda_2|Y)=l(1-\pi,\lambda_2,\lambda_1|Y)$. However, they are not the same distribution. We might need other information to differ these two cases.
 
 Then let's try to look at the confidence interval for $\pi$.
-Since $\pi$ has the restriction that $0<\pi<1$, we should constrain $\pi$ in a lower dimension parameter space $H$.
+Since $\pi$ has the restriction that $0<\pi<1$, we should constrain $\pi$ in a lower dimension parameter space $H$. To test whether $\pi$ should be restricted or not, we would like to perform a likelihood ratio test:
+$$H_0: \pi \in \Theta_0$$\
+$$H_1:\pi\in\Theta-\Theta_0$$.
+The critical value for this test is:
+$$-2(log())$$
 ```{r question 3 CI for pi}
 
 ```
