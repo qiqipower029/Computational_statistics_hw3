@@ -439,9 +439,40 @@ Since $\pi$ has the restriction that $0<\pi<1$, we should constrain $\pi$ in a l
 $$H_0: \pi \in \Theta_0$$\
 $$H_1:\pi\in\Theta-\Theta_0$$.
 The critical value for this test is:
-$$-2(log())$$
+$$2(l(\hat{\theta}, y_{obs})-l(\tilde{\theta}, y_{obs}))\sim\chi^2_{d}$$, since we only reduce one parameter in this case, so d = 1. If the critical value is larger than 3.84, then we will reject the null hypothesis, and conclude that $\pi$ cannot be reduced. However, if the test is not rejected, we will be able to construct the confidence interval for $\pi$. The interval would be $l(\tilde{\theta}, y_{obs})\leq l(\hat{\theta}, y_{obs})+1.92$
 ```{r question 3 CI for pi}
+# Find the 95% confidence interval for pi using inverting likelihood ratio test
+pi_CI = function(start, y) {
+  pi.grid = seq(0.01, 0.99, 0.01)
+  global = em.exponential.mixture(y, start, maxits = 10000, eps = 0.00001)
+  n_iter_result = global$iter
+  llmax = global[[4]][n_iter_result] # log likelihood for theta hat
+  loglik = numeric(length(pi.grid)) # results vector for log likelihood of theta tilde
+  
+  # Calculate log likelihood function for each fixed pi value
+  for (i in 1:length(pi.grid)) {
+    temp = em.exponential.mixture(y, start, maxits = 10000, eps = 0.00001, pi.fix = pi.grid[i])
+    n_iter = temp[[2]]
+    loglik[i] = temp[[4]][n_iter]
+  } 
+  
+  # Calculate the 95% CI for pi
+  range(pi.grid[loglik+1.92 >= llmax])
+}
 
+# CI for pi
+start = list(pi = 0.5, lambda1 = 1, lambda2 = 0.5)
+pi_CI(start, data3)
+
+# CI for 1-pi
+start2 = list(pi = 0.5, lambda1 = 0.5, lambda2 = 1)
+pi_CI(start2, data3)
+
+# CI for pi when lambda1 = lambda2
+start3 = list(pi = 0.5, lambda1 = 1, lambda2 = 1)
+pi_CI(start3, data3)
 ```
+
+From the 95% confidence interval, we could be able to do more concret inference. It is quite interesting that the sum of upper bound of $\pi$ and lower bound of $1-\pi$ is 1. Similarly, the lower bound of $\pi$ plus upper bound of $1-\pi$ is also 1. However, if we set $\lambda_1=\lambda_2$, the density function becomes just one exponential distribution density function with only one parameter $\lambda=\lambda_1(\lambda_2)$.
 
 ## Question 4
