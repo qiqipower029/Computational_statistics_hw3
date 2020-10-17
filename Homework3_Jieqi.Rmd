@@ -476,3 +476,48 @@ pi_CI(start3, data3)
 From the 95% confidence interval, we could be able to do more concret inference. It is quite interesting that the sum of upper bound of $\pi$ and lower bound of $1-\pi$ is 1. Similarly, the lower bound of $\pi$ plus upper bound of $1-\pi$ is also 1. However, if we set $\lambda_1=\lambda_2$, the density function becomes just one exponential distribution density function with only one parameter $\lambda=\lambda_1(\lambda_2)$.
 
 ## Question 4
+From the question, we know that:
+$$f(y_i;\theta)=\pi f_1(y_i;\lambda_1)+(1-\pi)f_2(y_i;\lambda_2)$$.
+Then we have:
+$$\begin{equation}
+\tag{1}
+\frac{\partial f}{\partial \pi}=f_1-f_2
+\end{equation}$$
+$$\begin{equation}
+\tag{2}
+\frac{\partial f}{\partial \lambda_1}=\pi \frac{\partial f_1}{\partial \lambda_1}
+\end{equation}$$
+$$\begin{equation}
+\tag{3}
+\frac{\partial f}{\partial \lambda_2}=(1-\pi) \frac{\partial f_2}{\partial \lambda_2}
+\end{equation}$$
+Here we also have $$\begin{equation}
+\tag{4}
+\pi^*=\frac{\pi f_1}{f}
+\end{equation}$$. So we have:
+$$\begin{equation}
+\tag{5}
+1-\pi^*=(1-\pi)\frac{\pi f_2}{f}
+\end{equation}$$.
+
+#### (a)
+$$\begin{align}
+\frac{\partial \pi^*}{\partial \pi} &= \frac{f_1f-\pi f_1 \frac{\partial f}{\partial \pi}}{f^2}\\
+&=\frac{f_1}{f}-\pi\frac{f_1}{f}\frac{f_1-f_2}{f}\\
+&=\frac{\pi^*}{\pi}-\pi\frac{\pi^*}{\pi}(\frac{\pi^*}{\pi}-\frac{1-\pi^*}{1-\pi})\\
+&=\frac{\pi^*(1-\pi^*)}{\pi (1-\pi)}
+\end{align}$$
+$$\begin{align}
+\frac{\partial \pi^*}{\partial \lambda_1} &= \frac{\frac{\pi \partial f_1}{\partial \lambda_1}f-\frac{\partial f}{\partial \lambda_1}f1}{f^2}\\
+&=\frac{f_1}{f}-\pi\frac{f_1}{f}\frac{f_1-f_2}{f}\\
+&=\frac{\pi}{f}(1-\pi) \frac{f_2}{f} \frac{\partial f_1}{\partial \lambda_1}\\
+&=\frac{\pi^*}{f_1}(1-\pi^*)\frac{\partial f_1}{\partial \lambda_1}\\
+&=\pi^*(1-\pi^*)\frac{\partial}{\partial \lambda_1}logf_1
+\end{align}$$
+$$\begin{align}
+\frac{\partial \pi^*}{\partial \lambda_2} &= -[\frac{\frac{(1-\pi) \partial f_2}{\partial \lambda_2}f-\frac{\partial f}{\partial \lambda_2}(1-\pi)f2}{f^2}]\\
+&=-[(1-\pi)\frac{f-(1-\pi)f_2}{f^2}\frac{\partial f_2}{\partial \lambda_2}]\\
+&=-[\frac{1-\pi}{f}\pi \frac{f_1}{f}\frac{\partial f_2}{\partial \lambda_2}]\\
+&=-[\frac{1-\pi}{f}\pi^*\frac{\partial f_2}{\partial \lambda_2}]\\
+&=-\pi^*(1-\pi^*)\frac{\partial}{\partial \lambda_2}logf_2
+\end{align}$$
