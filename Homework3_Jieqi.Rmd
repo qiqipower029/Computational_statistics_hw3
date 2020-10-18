@@ -565,6 +565,18 @@ $$\begin{align}
 \end{align}$$
 $$\begin{align}
 \frac{\partial^2 l_i}{\partial \lambda_1^2} &= \frac{\partial \frac{\partial l_i}{\partial \lambda_1}}{\partial \lambda_1}\\
-&=\frac{}{}
-&=-\frac{\pi^*(1-pi^*)}{\pi (1-\pi)}\frac{\partial}{\partial \lambda_2}logf_2 
+&=\frac{\partial^2 logf_1}{\partial \lambda_1^2}\pi^*+\frac{\partial \pi^*}{\partial \lambda_1}\frac{\partial logf_1}{\partial \lambda_1}\\
+&=\pi^* \frac{\partial^2}{\partial \lambda_2^2}logf_1(y_i;\lambda_1)+\pi^*(1-\pi^*)[\frac{\partial}{\partial \lambda_1}logf_1(y_i;\lambda_1)]^2
 \end{align}$$
+$$\begin{align}
+\frac{\partial^2 l_i}{\partial \lambda_2^2} &= \frac{\partial \frac{\partial l_i}{\partial \lambda_2}}{\partial \lambda_2}\\
+&=\frac{\partial^2 logf_2}{\partial \lambda_2^2}(1-\pi^*)+\frac{\partial (1-\pi^*)}{\partial \lambda_2}\frac{\partial logf_2}{\partial \lambda_2}\\
+&=(1-\pi^*) \frac{\partial^2}{\partial \lambda_2^2}logf_2(y_i;\lambda_2)+\pi^*(1-\pi^*)[\frac{\partial}{\partial \lambda_2}logf_2(y_i;\lambda_2)]^2
+\end{align}$$
+$$\begin{align}
+\frac{\partial^2 l_i}{\partial \lambda_1 \partial \lambda_2} &= \frac{\partial \frac{\partial l_i}{\partial \lambda_1}}{\partial \lambda_2}\\
+&=\frac{\partial logf_1}{\partial \lambda_1} \frac{\partial \pi^*}{\partial \lambda_2}\\
+&=-(1-\pi^*) \pi^* [\frac{\partial logf_1}{\partial \lambda_1}] [\frac{\partial logf_2}{\partial \lambda_2}]
+\end{align}$$
+
+## Question 5
