@@ -521,3 +521,50 @@ $$\begin{align}
 &=-[\frac{1-\pi}{f}\pi^*\frac{\partial f_2}{\partial \lambda_2}]\\
 &=-\pi^*(1-\pi^*)\frac{\partial}{\partial \lambda_2}logf_2
 \end{align}$$
+
+#### (b)
+$$\begin{align}
+\frac{\partial l_i}{\partial \pi} &= \frac{\partial logf}{\partial \pi}\\
+&=\frac{1}{f}\frac{\partial f}{\partial \pi}\\
+&=\frac{f_1-f_2}{f}\\
+&=\frac{\pi^*}{\pi}-\frac{1-\pi^*}{1-\pi}\\
+&=\frac{\pi^*-\pi}{\pi (1-\pi)}
+\end{align}$$
+$$\begin{align}
+\frac{\partial l_i}{\partial \lambda_1} &= \frac{\partial logf}{\partial \lambda_1}\\
+&=\frac{1}{f}\frac{\partial f}{\partial \lambda_1}\\
+&=\frac{1}{f}\pi \frac{\partial f_1}{\partial \lambda_1}\\
+&=\frac{\pi^*}{f_1} \frac{\partial f_1}{\partial \lambda_1}\\
+&=\pi^* \frac{\partial logf_1}{\partial \lambda_1}
+\end{align}$$
+$$\begin{align}
+\frac{\partial l_i}{\partial \lambda_2} &= \frac{\partial logf}{\partial \lambda_2}\\
+&=\frac{1}{f}(1-\pi)\frac{\partial f_2}{\partial \lambda_2}\\
+&=\frac{1-\pi^*}{f_2} \frac{\partial f_2}{\partial \lambda_2}\\
+&=(1-\pi^*)\frac{\partial logf_2}{\partial \lambda_2} 
+\end{align}$$
+
+#### (c)
+$$\begin{align}
+\frac{\partial^2 l_i}{\partial \pi^2} &= \frac{\partial \frac{\pi^*(1-\pi^*)}{\pi (1-\pi)}}{\partial \pi}\\
+&=\frac{(\frac{\partial \pi^*}{\partial \pi}-1)\pi (1-\pi)-(\pi^*-\pi)(1-2\pi)}{\pi^2(1-\pi)^2}\\
+&=\frac{-[\pi^2-2\pi \pi^* + (\pi^*)^2]}{\pi^2(1-\pi)^2}\\
+&=-\frac{(\pi^*-\pi)^2}{\pi^2(1-\pi)^2} 
+\end{align}$$
+$$\begin{align}
+\frac{\partial^2 l_i}{\partial \lambda_1 \partial \pi} &= \frac{\partial l_i}{\partial \pi}\frac{\partial logf_1}{\lambda_1}\\
+&=-\frac{\pi^*(1-pi^*)}{\pi (1-\pi)}\frac{\partial}{\partial \lambda_2}logf_2 
+\end{align}$$
+$$\begin{align}
+\frac{\partial^2 l_i}{\partial \lambda_1 \partial \pi} &= \frac{\partial \frac{\partial l_i}{\partial \pi}}{\partial \lambda_1}\\
+&=\frac{\pi^*(1-pi^*)}{\pi (1-\pi)}\frac{\partial}{\partial \lambda_1}logf_1 
+\end{align}$$
+$$\begin{align}
+\frac{\partial^2 l_i}{\partial \lambda_2 \partial \pi} &= \frac{\partial \frac{\partial l_i}{\partial \pi}}{\partial \lambda_2}\\
+&=-\frac{\pi^*(1-pi^*)}{\pi (1-\pi)}\frac{\partial}{\partial \lambda_2}logf_2 
+\end{align}$$
+$$\begin{align}
+\frac{\partial^2 l_i}{\partial \lambda_1^2} &= \frac{\partial \frac{\partial l_i}{\partial \lambda_1}}{\partial \lambda_1}\\
+&=\frac{}{}
+&=-\frac{\pi^*(1-pi^*)}{\pi (1-\pi)}\frac{\partial}{\partial \lambda_2}logf_2 
+\end{align}$$
