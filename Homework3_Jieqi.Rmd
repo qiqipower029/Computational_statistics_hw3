@@ -780,6 +780,8 @@ em.exponential.mixture_sec_der <-function(y, startval, maxits=10000, eps=0.00001
 
 Now we check the result for $\lambda_1<\lambda_2$:
 ```{r question 5 c lambda1<lambda2}
+start1 = list(pi = 0.5, lambda1 = 0.5, lambda2 = 2)
+start2 = list(pi = 0.5, lambda1 = 2, lambda2 = 0.5)
 em.exponential.mixture_sec_der(data5, start1)
 ```
 
@@ -788,7 +790,7 @@ Then we check the result for $\lambda_1>\lambda_2$:
 em.exponential.mixture_sec_der(data5, start2)
 ```
 
-From the result, we could see that, using the information matrix, we could get a more concret and a relatively narrow confidence interval.
+From the result, we could see that, using the information matrix, we could get a more concret and a relatively narrow confidence interval. The CI's are symmetric when we switch the starting values.
 
 #### (d)
 First let's plot the log likelihood function
@@ -847,3 +849,12 @@ pi_CI(start3, data5)
 ```
 
 From the result, we could see that, with larger sample size, inverting likelihood ratio test can narrow the CI for MLE. However, the ranges are still larger than using information matrix directly.
+
+## Question 6
+Firstly we want to run the EM algorithm to estimate $\theta_1, \theta_2, \theta_3, \theta_4$.
+So here we need to define the EM function for this question.
+```{r question 6 define function}
+# Define the function for question 6
+EM_q6 = function(start, )
+```
+
