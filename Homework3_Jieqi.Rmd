@@ -580,3 +580,270 @@ $$\begin{align}
 \end{align}$$
 
 ## Question 5
+```{r question 5 import data}
+# Import dataset
+data5 = read.table(file = "mixture10000.dat") %>% t() %>% as.vector()
+```
+
+#### (a)
+Apply the EM algorithm to the dataset.
+```{r question 5 a}
+start1 = list(pi = 0.5, lambda1 = 0.5, lambda2 = 2)
+start2 = list(pi = 0.5, lambda1 = 1, lambda2 = 0.5)
+
+# Revise function so that the result won't show the log likelihood
+em.exponential.mixture_new<-function(y, startval, maxits=10000, eps=0.00001, pi.fix){
+  n<-length(y) ; newtheta<-startval
+  if(!missing(pi.fix)) newtheta$pi<-pi.fix
+  iter<-0
+  converged<-F
+  loglik<-numeric(maxits)
+  while((!converged)&(iter<maxits)){
+    iter<-iter+1
+    theta<-newtheta
+    
+    # DO E-STEP
+    pix<-theta$pi
+    lambda1<-theta$lambda1
+    lambda2<-theta$lambda2
+    num<-pix*lambda1*exp(-lambda1*y)
+    denom<-num+(1-pix)*lambda2*exp(-lambda2*y)
+    delta<-num/denom # parameter for the Bernoulli distribution
+    T1<-sum(delta) ; T2<-sum(delta*y) ; T3<-sum(y)
+    loglik[iter]<-sum(log(denom))
+    
+    # DO M-STEP
+    if (missing(pi.fix)) pix<-T1/n
+    lambda1<-T1/T2
+    lambda2<-(n-T1)/(T3-T2)
+    newtheta<-list(pix=pix, lambda1=lambda1, lambda2=lambda2)
+    
+    # ASSESS CONVERGENCE
+    old<-c(theta$pi, theta$lambda1, theta$lambda2)
+    new<-c(newtheta$pi, newtheta$lambda1, newtheta$lambda2)
+    converged<-all(abs(old-new)<=eps*abs(old))}
+    loglik<-loglik[1:iter]
+    list(theta=newtheta,iter=iter, converged=converged)}
+
+em.exponential.mixture_new(data5, start1)
+em.exponential.mixture_new(data5, start2)
+```
+
+As the result shows, although we have a much larger sample size in this data, the estimates are still confusing.
+
+#### (b)
+Calculate the first derivative of the log-likelihood function for this dataset.
+```{r question 5 b define function}
+# Add codes to previous function to calculate first derivatives at mode
+em.exponential.mixture_first_der <-function(y, startval, maxits=10000, eps=0.00001, pi.fix){
+  n<-length(y) ; newtheta<-startval
+  if(!missing(pi.fix)) newtheta$pi<-pi.fix
+  iter<-0
+  converged<-F
+  loglik<-numeric(maxits)
+  while((!converged)&(iter<maxits)){
+    iter<-iter+1
+    theta<-newtheta
+    
+    # DO E-STEP
+    pix<-theta$pi
+    lambda1<-theta$lambda1
+    lambda2<-theta$lambda2
+    num<-pix*lambda1*exp(-lambda1*y)
+    denom<-num+(1-pix)*lambda2*exp(-lambda2*y)
+    delta<-num/denom # parameter for the Bernoulli distribution
+    T1<-sum(delta) ; T2<-sum(delta*y) ; T3<-sum(y)
+    loglik[iter]<-sum(log(denom))
+    
+    # DO M-STEP
+    if (missing(pi.fix)) pix<-T1/n
+    lambda1<-T1/T2
+    lambda2<-(n-T1)/(T3-T2)
+    num<-pix*lambda1*exp(-lambda1*y)
+    denom<-num+(1-pix)*lambda2*exp(-lambda2*y)
+    delta<-num/denom # parameter for the Bernoulli distribution
+    newtheta<-list(pix=pix, lambda1=lambda1, lambda2=lambda2)
+    
+    # ASSESS CONVERGENCE
+    old<-c(theta$pi, theta$lambda1, theta$lambda2)
+    new<-c(newtheta$pi, newtheta$lambda1, newtheta$lambda2)
+    converged<-all(abs(old-new)<=eps*abs(old))}
+    loglik<-loglik[1:iter]
+    list(theta=newtheta,iter=iter, converged=converged)
+    
+    # Calculate first derivative
+    lambda1 = newtheta$lambda1
+    lambda2 = newtheta$lambda2
+    pi = newtheta$pi
+    pi.first_der = sum((delta-newtheta$pi)/(newtheta$pi*(1-newtheta$pi)))
+    lambda1.first.der = sum(delta * ( 1/newtheta$lambda1 - y))
+    lambda2.first.der = sum((1 - delta) * (1/lambda2 - y))
+    
+    list(theta=newtheta,iter=iter, converged=converged,
+         first.der = c(pi = pi.first_der, lambda1 = lambda1.first.der, lambda2 = lambda2.first.der))
+}
+```
+
+We first look at the situation when $\lambda_1<\lambda_2$:
+```{r question 5 b lambda1<lambda2}
+em.exponential.mixture_first_der(data5, start1)
+```
+
+Then we want to also look at the situation when $\lambda_1 > \lambda_2$:
+```{r question 5 b lambda1<lambda2}
+em.exponential.mixture_first_der(data5, start2)
+```
+
+From the result we could see that, at mode, although the direvatives are not exactly zero, they are very small.
+
+#### (c)
+Calculate the $3 \times 3$ matrix of second derivatives at the mode and obtain asymptotic standard errors
+for each of the estimated parameters.
+
+Firstly we need to add codes to the previous function to calculate second derivatives for parameters.
+```{r question 5 c}
+em.exponential.mixture_sec_der <-function(y, startval, maxits=10000, eps=0.00001, pi.fix){
+  n<-length(y) ; newtheta<-startval
+  if(!missing(pi.fix)) newtheta$pi<-pi.fix
+  iter<-0
+  converged<-F
+  loglik<-numeric(maxits)
+  
+  # Create a matrix to store values of second derivatives
+  sec_mat = diag(length(startval))
+  while((!converged)&(iter<maxits)){
+    iter<-iter+1
+    theta<-newtheta
+    
+    # DO E-STEP
+    pix<-theta$pi
+    lambda1<-theta$lambda1
+    lambda2<-theta$lambda2
+    num<-pix*lambda1*exp(-lambda1*y)
+    denom<-num+(1-pix)*lambda2*exp(-lambda2*y)
+    delta<-num/denom # parameter for the Bernoulli distribution
+    T1<-sum(delta) ; T2<-sum(delta*y) ; T3<-sum(y)
+    loglik[iter]<-sum(log(denom))
+    
+    # DO M-STEP
+    if (missing(pi.fix)) pix<-T1/n
+    lambda1<-T1/T2
+    lambda2<-(n-T1)/(T3-T2)
+    num<-pix*lambda1*exp(-lambda1*y)
+    denom<-num+(1-pix)*lambda2*exp(-lambda2*y)
+    delta<-num/denom # parameter for the Bernoulli distribution
+    newtheta<-list(pix=pix, lambda1=lambda1, lambda2=lambda2)
+    
+    # ASSESS CONVERGENCE
+    old<-c(theta$pi, theta$lambda1, theta$lambda2)
+    new<-c(newtheta$pi, newtheta$lambda1, newtheta$lambda2)
+    converged<-all(abs(old-new)<=eps*abs(old))}
+    loglik<-loglik[1:iter]
+    list(theta=newtheta,iter=iter, converged=converged)
+    
+    # Calculate first derivative
+    lambda1 = newtheta$lambda1
+    lambda2 = newtheta$lambda2
+    pi = newtheta$pi
+    pi.first_der = sum((delta-newtheta$pi)/(newtheta$pi*(1-newtheta$pi)))
+    lambda1.first.der = sum(delta * ( 1/newtheta$lambda1 - y))
+    lambda2.first.der = sum((1 - delta) * (1/lambda2 - y))
+    
+    # Calculate second derivative
+    sec_mat[1,1] = sum(-(delta - pi)^2/(pi^2*(1-pi)^2))
+    sec_mat[1,2] = sum( delta * (1 - delta)/(pi * (1 - pi)) * (1/lambda1 - y))
+    sec_mat[1,3] = sum( -delta * (1 - delta)/(pi * (1 - pi)) * (1/lambda2 - y))
+    sec_mat[2,2] = sum( delta * (-1/lambda1^2) + delta * (1 - delta) * (1/lambda1 - y)^2)
+    sec_mat[3,3] = sum( (1-delta)* (-1/lambda2^2) + delta * (1 - delta)*(1/lambda2 - y)^2)
+    sec_mat[2,3] = sum( -delta*(1 - delta) * (1/lambda1 - y)*(1/lambda2 - y))
+    sec_mat[2,1] = sec_mat[1,2]
+    sec_mat[3,1] = sec_mat[1,3]
+    sec_mat[3,2] = sec_mat[2,3]
+    
+    # Calculate the standard errors
+    se_pi = sqrt(-1/sec_mat[1,1])
+    se_lambda1 = sqrt(-1/sec_mat[2,2])
+    se_lambda2 = sqrt(-1/sec_mat[3,3])
+    
+    # Calculate 95% CI for ML estimates
+    CI_pi = pi + c(-1.96*se_pi, 1.96*se_pi)
+    CI_lambda1 = lambda1 + c(-1.96*se_lambda1, 1.96*se_lambda1)
+    CI_lambda2 = lambda2 + c(-1.96*se_lambda2, 1.96*se_lambda2)
+    
+    list(theta=newtheta,iter=iter, converged=converged,
+         first.der = c(pi = pi.first_der, lambda1 = lambda1.first.der, lambda2 = lambda2.first.der),
+         sec.der_matrix = sec_mat,
+         SE = c(pi = se_pi, lambda1 = se_lambda1, lambda2 = se_lambda2),
+         CI = list(pi = CI_pi, lambda1 = CI_lambda1, lambda2 = CI_lambda2))
+}
+```
+
+Now we check the result for $\lambda_1<\lambda_2$:
+```{r question 5 c lambda1<lambda2}
+em.exponential.mixture_sec_der(data5, start1)
+```
+
+Then we check the result for $\lambda_1>\lambda_2$:
+```{r question 5 c lambda1>lambda2}
+em.exponential.mixture_sec_der(data5, start2)
+```
+
+From the result, we could see that, using the information matrix, we could get a more concret and a relatively narrow confidence interval.
+
+#### (d)
+First let's plot the log likelihood function
+```{r question 5 plot the log likelihood, message=FALSE}
+pi_range = seq(0.01, 0.99, 0.001)
+start3 = list(pi = 0.5, lambda1 = 0.75, lambda2 = 0.75)
+
+logL1 = numeric(length(pi_range))
+logL2 = numeric(length(pi_range))
+logL3 = numeric(length(pi_range))
+for (i in 1:length(pi_range)) {
+  result1 = em.exponential.mixture(data5, start1, eps = 0.000001, pi.fix = pi_range[i])
+  result2 = em.exponential.mixture(data5, start2, eps = 0.000001, pi.fix = pi_range[i])
+  result3 = em.exponential.mixture(data5, start3, eps = 0.000001, pi.fix = pi_range[i])
+  conv_n1 = result1$iter
+  conv_n2 = result2$iter
+  conv_n3 = result3$iter
+  logL1[i] = result1[[4]][conv_n1]
+  logL2[i] = result2[[4]][conv_n2]
+  logL3[i] = result3[[4]][conv_n3]
+}
+
+plot_table = cbind(pi_range, logL1, logL2, logL3) %>% as.data.frame()
+plot_table %>% 
+  ggplot(aes(x = pi_range)) + 
+  geom_line(aes(y = logL1, colour = "pi")) +
+  geom_line(aes(y = logL2, colour = "1-pi")) +
+  geom_line(aes(y = logL3, colour = "lambda1 = lambda2")) +
+  theme_bw() + labs(
+    x = "Pi",
+    y = "Log Likelihood Function"
+  )
+```
+
+From the plot we could see that, the log likelihood function are quite similar. The mode for $\pi$ is approximately 0.5 for both situations.
+
+Then let's try to look at the confidence interval for $\pi$.
+Since $\pi$ has the restriction that $0<\pi<1$, we should constrain $\pi$ in a lower dimension parameter space $H$. To test whether $\pi$ should be restricted or not, we would like to perform a likelihood ratio test:
+$$H_0: \pi \in \Theta_0$$\
+$$H_1:\pi\in\Theta-\Theta_0$$.
+The critical value for this test is:
+$$2(l(\hat{\theta}, y_{obs})-l(\tilde{\theta}, y_{obs}))\sim\chi^2_{d}$$, since we only reduce one parameter in this case, so d = 1. If the critical value is larger than 3.84, then we will reject the null hypothesis, and conclude that $\pi$ cannot be reduced. However, if the test is not rejected, we will be able to construct the confidence interval for $\pi$. The interval would be $l(\tilde{\theta}, y_{obs})\leq l(\hat{\theta}, y_{obs})+1.92$
+```{r question 5 CI for pi}
+# Find the 95% confidence interval for pi using inverting likelihood ratio test
+# CI for pi
+start = list(pi = 0.5, lambda1 = 1, lambda2 = 0.5)
+pi_CI(start, data5)
+
+# CI for 1-pi
+start2 = list(pi = 0.5, lambda1 = 0.5, lambda2 = 1)
+pi_CI(start2, data5)
+
+# CI for pi when lambda1 = lambda2
+start3 = list(pi = 0.5, lambda1 = 1, lambda2 = 1)
+pi_CI(start3, data5)
+```
+
+From the result, we could see that, with larger sample size, inverting likelihood ratio test can narrow the CI for MLE. However, the ranges are still larger than using information matrix directly.
