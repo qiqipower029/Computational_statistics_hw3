@@ -885,6 +885,42 @@ EM_q6 = function(start, x, maxits = 500, eps = 0.000001, indep = F, homo = F) {
     theta2_ = theta21 + theta22
     
     # Evalueate ovserved data likelihood
+    la = x11*log(theta11) + x12*log(theta12) + x21*log(theta21) + x22*log(theta22)
+    lb = x1B*log(theta1_) + x2B*log(theta2_)
+    lc = xC1*log(theta_1) + xC2*log(theta_2)
+    ll = la + lb + lc
+    loglik[iter] = ll
+    
+    # E-step
+    ET11 = x11 + x1B*(theta11/theta1_) + xC1*(theta11/theta_1)
+    ET12 = x12 + x1B*(theta12/theta1_) + xC2*(theta12/theta_2)
+    ET21 = x21 + x2B*(theta21/theta2_) + xC1*(theta21/theta_1)
+    ET22 = x22 + x2B*(theta22/theta2_) + xC2*(theta22/theta_2)
+    
+    # M-step
+    if(!indep & !homo) {
+      newtheta11 = (ET11)/n
+      newtheta12 = (ET12)/n
+      newtheta21 = (ET21)/n
+      newtheta22 = (ET22)/n
+    }
+    
+    if(indep) {
+      newtheta11 = (ET11+ET12)*(ET11+ET21)/n^2
+      newtheta12 = (ET11+ET12)*(ET12+ET22)/n^2
+      newtheta21 = (ET11+ET12)*(ET11+ET21)/n^2
+      newtheta11 = (ET11+ET12)*(ET11+ET21)/n^2
+    }
+    
+    if(homo) {
+      newtheta11 = (ET11)/n
+      newtheta12 = (ET12+ET21)/(2*n)
+      newtheta21 = (ET21+ET12)/(2*n)
+      newtheta22 = (ET22)/n
+    }
+
+
+
   }
 }
 ```
