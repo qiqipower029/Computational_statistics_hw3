@@ -855,6 +855,37 @@ Firstly we want to run the EM algorithm to estimate $\theta_1, \theta_2, \theta_
 So here we need to define the EM function for this question.
 ```{r question 6 define function}
 # Define the function for question 6
-EM_q6 = function(start, )
+EM_q6 = function(start, x, maxits = 500, eps = 0.000001, indep = F, homo = F) {
+  
+  newtheta11 = start$theta11
+  newtheta12 = start$theta12
+  newtheta21 = start$theta21
+  newtheta22 = start$theta22
+  
+  x11 = x[1,1]; x12 = x[1,2]; x21 = x[2,1]; x22 = x[2,2]
+  x1B = x[1,3]; x2B = x[2,3]; xC1 = x[3,1]; xC2 = x[3,2]
+  
+  n = sum(x) - x[3,3]
+  
+  iter = 0
+  loglik = numeric(maxits)
+  cvgd = F
+  
+  while ((iter<maxits)&(!cvgd)) {
+    
+    iter = iter+1
+    theta11 = newtheta11
+    theta12 = newtheta12
+    theta21 = newtheta21
+    theta22 = newtheta22
+    
+    theta_1 = theta11 + theta21
+    theta_2 = theta12 + theta22
+    theta1_ = theta11 + theta12
+    theta2_ = theta21 + theta22
+    
+    # Evalueate ovserved data likelihood
+  }
+}
 ```
 
