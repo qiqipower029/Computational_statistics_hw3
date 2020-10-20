@@ -43,7 +43,6 @@ univariate.normal.em.demirtas<-function(y, start, maxits=500, eps=0.000001){
   newmu<-start$mu ; newsigma2<-start$sigma2 ; n<-length(y)
   w<-!is.na(y) ; yobs<-y[w] ; nobs<-length(yobs) ; nmis<-n-nobs
   loglik<-numeric(maxits) ; iter<-0 ; cvgd<-F
-  cat(paste("Performing iterations of EM...","\n"))
   
   while ((iter<maxits)&(!cvgd)){
   iter<-iter+1 ; mu<-newmu ; sigma2<-newsigma2
@@ -59,7 +58,6 @@ univariate.normal.em.demirtas<-function(y, start, maxits=500, eps=0.000001){
   # ASSESS CONVERGENCE
   cvgd<-(abs(newmu-mu)<=eps*abs(mu)) & (abs(newsigma2-sigma2)<=eps*abs(sigma2))}
   
-  cat(paste("Done!","\n"))
   theta<-list(mu=newmu, sigma2=newsigma2)
   loglik<-loglik[1:iter]
   result<-list(theta=theta, iter=iter, cvgd=cvgd,loglik=loglik)
@@ -479,105 +477,91 @@ From the 95% confidence interval, we could be able to do more concret inference.
 From the question, we know that:
 $$f(y_i;\theta)=\pi f_1(y_i;\lambda_1)+(1-\pi)f_2(y_i;\lambda_2)$$.
 Then we have:
-$$\begin{equation}
-\tag{1}
-\frac{\partial f}{\partial \pi}=f_1-f_2
-\end{equation}$$
-$$\begin{equation}
-\tag{2}
-\frac{\partial f}{\partial \lambda_1}=\pi \frac{\partial f_1}{\partial \lambda_1}
-\end{equation}$$
-$$\begin{equation}
-\tag{3}
-\frac{\partial f}{\partial \lambda_2}=(1-\pi) \frac{\partial f_2}{\partial \lambda_2}
-\end{equation}$$
-Here we also have $$\begin{equation}
-\tag{4}
-\pi^*=\frac{\pi f_1}{f}
-\end{equation}$$. So we have:
-$$\begin{equation}
-\tag{5}
-1-\pi^*=(1-\pi)\frac{\pi f_2}{f}
-\end{equation}$$.
+$$\frac{\partial f}{\partial \pi}=f_1-f_2$$
+$$\frac{\partial f}{\partial \lambda_1}=\pi \frac{\partial f_1}{\partial \lambda_1}$$
+$$\frac{\partial f}{\partial \lambda_2}=(1-\pi) \frac{\partial f_2}{\partial \lambda_2}$$
+Here we also have 
+$$\pi^*=\frac{\pi f_1}{f}$$. So we have:
+$$1-\pi^*=(1-\pi)\frac{\pi f_2}{f}$$.
 
 #### (a)
-$$\begin{align}
+$$\begin{split}
 \frac{\partial \pi^*}{\partial \pi} &= \frac{f_1f-\pi f_1 \frac{\partial f}{\partial \pi}}{f^2}\\
 &=\frac{f_1}{f}-\pi\frac{f_1}{f}\frac{f_1-f_2}{f}\\
 &=\frac{\pi^*}{\pi}-\pi\frac{\pi^*}{\pi}(\frac{\pi^*}{\pi}-\frac{1-\pi^*}{1-\pi})\\
-&=\frac{\pi^*(1-\pi^*)}{\pi (1-\pi)}
-\end{align}$$
-$$\begin{align}
+&=\frac{\pi^*(1-\pi^*)}{\pi (1-\pi)}\\
+\end{split}$$\
+$$\begin{split}
 \frac{\partial \pi^*}{\partial \lambda_1} &= \frac{\frac{\pi \partial f_1}{\partial \lambda_1}f-\frac{\partial f}{\partial \lambda_1}f1}{f^2}\\
 &=\frac{f_1}{f}-\pi\frac{f_1}{f}\frac{f_1-f_2}{f}\\
 &=\frac{\pi}{f}(1-\pi) \frac{f_2}{f} \frac{\partial f_1}{\partial \lambda_1}\\
 &=\frac{\pi^*}{f_1}(1-\pi^*)\frac{\partial f_1}{\partial \lambda_1}\\
-&=\pi^*(1-\pi^*)\frac{\partial}{\partial \lambda_1}logf_1
-\end{align}$$
-$$\begin{align}
+&=\pi^*(1-\pi^*)\frac{\partial}{\partial \lambda_1}logf_1\\
+\end{split}$$\
+$$\begin{split}
 \frac{\partial \pi^*}{\partial \lambda_2} &= -[\frac{\frac{(1-\pi) \partial f_2}{\partial \lambda_2}f-\frac{\partial f}{\partial \lambda_2}(1-\pi)f2}{f^2}]\\
 &=-[(1-\pi)\frac{f-(1-\pi)f_2}{f^2}\frac{\partial f_2}{\partial \lambda_2}]\\
 &=-[\frac{1-\pi}{f}\pi \frac{f_1}{f}\frac{\partial f_2}{\partial \lambda_2}]\\
 &=-[\frac{1-\pi}{f}\pi^*\frac{\partial f_2}{\partial \lambda_2}]\\
-&=-\pi^*(1-\pi^*)\frac{\partial}{\partial \lambda_2}logf_2
-\end{align}$$
+&=-\pi^*(1-\pi^*)\frac{\partial}{\partial \lambda_2}logf_2\\
+\end{split}$$
 
 #### (b)
-$$\begin{align}
+$$\begin{split}
 \frac{\partial l_i}{\partial \pi} &= \frac{\partial logf}{\partial \pi}\\
 &=\frac{1}{f}\frac{\partial f}{\partial \pi}\\
 &=\frac{f_1-f_2}{f}\\
 &=\frac{\pi^*}{\pi}-\frac{1-\pi^*}{1-\pi}\\
-&=\frac{\pi^*-\pi}{\pi (1-\pi)}
-\end{align}$$
-$$\begin{align}
+&=\frac{\pi^*-\pi}{\pi (1-\pi)}\\
+\end{split}$$\
+$$\begin{split}
 \frac{\partial l_i}{\partial \lambda_1} &= \frac{\partial logf}{\partial \lambda_1}\\
 &=\frac{1}{f}\frac{\partial f}{\partial \lambda_1}\\
 &=\frac{1}{f}\pi \frac{\partial f_1}{\partial \lambda_1}\\
 &=\frac{\pi^*}{f_1} \frac{\partial f_1}{\partial \lambda_1}\\
-&=\pi^* \frac{\partial logf_1}{\partial \lambda_1}
-\end{align}$$
-$$\begin{align}
+&=\pi^* \frac{\partial logf_1}{\partial \lambda_1}\\
+\end{split}$$\
+$$\begin{split}
 \frac{\partial l_i}{\partial \lambda_2} &= \frac{\partial logf}{\partial \lambda_2}\\
 &=\frac{1}{f}(1-\pi)\frac{\partial f_2}{\partial \lambda_2}\\
 &=\frac{1-\pi^*}{f_2} \frac{\partial f_2}{\partial \lambda_2}\\
-&=(1-\pi^*)\frac{\partial logf_2}{\partial \lambda_2} 
-\end{align}$$
+&=(1-\pi^*)\frac{\partial logf_2}{\partial \lambda_2}\\
+\end{split}$$
 
 #### (c)
-$$\begin{align}
+$$\begin{split}
 \frac{\partial^2 l_i}{\partial \pi^2} &= \frac{\partial \frac{\pi^*(1-\pi^*)}{\pi (1-\pi)}}{\partial \pi}\\
 &=\frac{(\frac{\partial \pi^*}{\partial \pi}-1)\pi (1-\pi)-(\pi^*-\pi)(1-2\pi)}{\pi^2(1-\pi)^2}\\
 &=\frac{-[\pi^2-2\pi \pi^* + (\pi^*)^2]}{\pi^2(1-\pi)^2}\\
-&=-\frac{(\pi^*-\pi)^2}{\pi^2(1-\pi)^2} 
-\end{align}$$
-$$\begin{align}
+&=-\frac{(\pi^*-\pi)^2}{\pi^2(1-\pi)^2}\\
+\end{split}$$\
+$$\begin{split}
 \frac{\partial^2 l_i}{\partial \lambda_1 \partial \pi} &= \frac{\partial l_i}{\partial \pi}\frac{\partial logf_1}{\lambda_1}\\
-&=-\frac{\pi^*(1-pi^*)}{\pi (1-\pi)}\frac{\partial}{\partial \lambda_2}logf_2 
-\end{align}$$
-$$\begin{align}
+&=-\frac{\pi^*(1-pi^*)}{\pi (1-\pi)}\frac{\partial}{\partial \lambda_2}logf_2\\
+\end{split}$$\
+$$\begin{split}
 \frac{\partial^2 l_i}{\partial \lambda_1 \partial \pi} &= \frac{\partial \frac{\partial l_i}{\partial \pi}}{\partial \lambda_1}\\
-&=\frac{\pi^*(1-pi^*)}{\pi (1-\pi)}\frac{\partial}{\partial \lambda_1}logf_1 
-\end{align}$$
-$$\begin{align}
+&=\frac{\pi^*(1-pi^*)}{\pi (1-\pi)}\frac{\partial}{\partial \lambda_1}logf_1\\
+\end{split}$$\
+$$\begin{split}
 \frac{\partial^2 l_i}{\partial \lambda_2 \partial \pi} &= \frac{\partial \frac{\partial l_i}{\partial \pi}}{\partial \lambda_2}\\
-&=-\frac{\pi^*(1-pi^*)}{\pi (1-\pi)}\frac{\partial}{\partial \lambda_2}logf_2 
-\end{align}$$
-$$\begin{align}
+&=-\frac{\pi^*(1-pi^*)}{\pi (1-\pi)}\frac{\partial}{\partial \lambda_2}logf_2\\
+\end{split}$$\
+$$\begin{split}
 \frac{\partial^2 l_i}{\partial \lambda_1^2} &= \frac{\partial \frac{\partial l_i}{\partial \lambda_1}}{\partial \lambda_1}\\
 &=\frac{\partial^2 logf_1}{\partial \lambda_1^2}\pi^*+\frac{\partial \pi^*}{\partial \lambda_1}\frac{\partial logf_1}{\partial \lambda_1}\\
-&=\pi^* \frac{\partial^2}{\partial \lambda_2^2}logf_1(y_i;\lambda_1)+\pi^*(1-\pi^*)[\frac{\partial}{\partial \lambda_1}logf_1(y_i;\lambda_1)]^2
-\end{align}$$
-$$\begin{align}
+&=\pi^* \frac{\partial^2}{\partial \lambda_2^2}logf_1(y_i;\lambda_1)+\pi^*(1-\pi^*)[\frac{\partial}{\partial \lambda_1}logf_1(y_i;\lambda_1)]^2\\
+\end{split}$$\
+$$\begin{split}
 \frac{\partial^2 l_i}{\partial \lambda_2^2} &= \frac{\partial \frac{\partial l_i}{\partial \lambda_2}}{\partial \lambda_2}\\
 &=\frac{\partial^2 logf_2}{\partial \lambda_2^2}(1-\pi^*)+\frac{\partial (1-\pi^*)}{\partial \lambda_2}\frac{\partial logf_2}{\partial \lambda_2}\\
-&=(1-\pi^*) \frac{\partial^2}{\partial \lambda_2^2}logf_2(y_i;\lambda_2)+\pi^*(1-\pi^*)[\frac{\partial}{\partial \lambda_2}logf_2(y_i;\lambda_2)]^2
-\end{align}$$
-$$\begin{align}
+&=(1-\pi^*) \frac{\partial^2}{\partial \lambda_2^2}logf_2(y_i;\lambda_2)+\pi^*(1-\pi^*)[\frac{\partial}{\partial \lambda_2}logf_2(y_i;\lambda_2)]^2\\
+\end{split}$$\
+$$\begin{split}
 \frac{\partial^2 l_i}{\partial \lambda_1 \partial \lambda_2} &= \frac{\partial \frac{\partial l_i}{\partial \lambda_1}}{\partial \lambda_2}\\
 &=\frac{\partial logf_1}{\partial \lambda_1} \frac{\partial \pi^*}{\partial \lambda_2}\\
-&=-(1-\pi^*) \pi^* [\frac{\partial logf_1}{\partial \lambda_1}] [\frac{\partial logf_2}{\partial \lambda_2}]
-\end{align}$$
+&=-(1-\pi^*) \pi^* [\frac{\partial logf_1}{\partial \lambda_1}] [\frac{\partial logf_2}{\partial \lambda_2}]\\
+\end{split}$$
 
 ## Question 5
 ```{r question 5 import data}
@@ -690,7 +674,7 @@ em.exponential.mixture_first_der(data5, start1)
 ```
 
 Then we want to also look at the situation when $\lambda_1 > \lambda_2$:
-```{r question 5 b lambda1<lambda2}
+```{r question 5 b lambda1>lambda2}
 em.exponential.mixture_first_der(data5, start2)
 ```
 
