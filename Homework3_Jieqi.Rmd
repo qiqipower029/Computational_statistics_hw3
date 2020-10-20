@@ -908,8 +908,8 @@ EM_q6 = function(start, x, maxits = 500, eps = 0.000001, indep = F, homo = F) {
     if(indep) {
       newtheta11 = (ET11+ET12)*(ET11+ET21)/n^2
       newtheta12 = (ET11+ET12)*(ET12+ET22)/n^2
-      newtheta21 = (ET11+ET12)*(ET11+ET21)/n^2
-      newtheta11 = (ET11+ET12)*(ET11+ET21)/n^2
+      newtheta21 = (ET21+ET22)*(ET11+ET21)/n^2
+      newtheta22 = (ET21+ET22)*(ET12+ET22)/n^2
     }
     
     if(homo) {
@@ -918,10 +918,58 @@ EM_q6 = function(start, x, maxits = 500, eps = 0.000001, indep = F, homo = F) {
       newtheta21 = (ET21+ET12)/(2*n)
       newtheta22 = (ET22)/n
     }
-
-
-
+    
+    # Assess convergence
+    cvgd = (abs(newtheta11-theta11)) <= eps*abs(theta11) &
+           (abs(newtheta12-theta12)) <= eps*abs(theta12) &
+           (abs(newtheta21-theta21)) <= eps*abs(theta21) &
+           (abs(newtheta22-theta22)) <= eps*abs(theta22) 
   }
+  
+  theta = list(theta11 = newtheta11, theta12 = newtheta12,
+               theta21 = newtheta21, theta22 = newtheta22)
+  loglik = loglik[1:iter]
+  result = list(theta = theta, iter = iter, cvgd = cvgd, loglik = loglik)
+  
+  return(result)
 }
+
+# Import data
+x = matrix(c(392, 55, 33, 
+             76, 38, 9,
+             31, 7, 115), byrow = T, ncol = 3)
 ```
 
+Set the starting values of theta to be 0.25 and look at the result.
+```{r question 6 MLE}
+theta = list(theta11 = 0.25, theta12 = 0.25, theta21 = 0.25, theta22 = 0.25)
+EM_q6(theta, x)
+```
+
+Then we want to test the independence and homogeneity assumptions through the likelihood ratio test.
+If the columns and rows are independent, we will have:
+$$\tilde{\theta_{ij}}=\frac{x_{i+}x_{+j}}{n^2}=\frac{(x_{i1}+x_{i2})(x_{1j}+x_{2j})}{n^2}$$
+Let's see the result for independent data.
+```{r question 6 independence}
+EM_q6(theta, x, indep = T)
+```
+
+Here we state the hypothesis:
+$$H_0: \theta_{ij}\in\Theta_0$$\
+$$H_1: \theta_{ij}\in\Theta-\Theta_0$$
+$$-2[l(\hat\theta|X)-l(\tilde\theta|X)]=2*(-562.5034+575.1943)=25.3818>3.84$$
+Hence we reject the null hypothesis at 0.05 significant level, and conclude that rows and columns are not independent.
+
+Check homogeneity in this case.
+Here we state the hypothesis:
+$$H_0: \theta_{12}=\theta_{21}$$
+$$H_1: \theta_{12}\neq \theta_{21}$$
+Let's get the log likelihood under homogeneous assumption:
+```{r questin 6 homogeneity}
+EM_q6(theta, x, homo = T)
+1-pchisq(3.4964, 1)
+```
+
+The critical value would be:
+$$-2[l(\hat\theta|X)-l(\tilde\theta|X)]=2*(-562.5034+564.2516)=3.4964<3.84$$
+The p-value of this critical value is 0.06. So here we do not have enough evidence to reject null and conclude that the assumption of homogeneity holds.
